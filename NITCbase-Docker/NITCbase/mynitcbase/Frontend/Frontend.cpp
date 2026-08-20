@@ -61,22 +61,20 @@ int Frontend::select_attrlist_from_table(char relname_source[ATTR_SIZE], char re
   return SUCCESS;
 }
 
-int Frontend::select_from_table_where(char relname_source[ATTR_SIZE], char relname_target[ATTR_SIZE],
-                                      char attribute[ATTR_SIZE], int op, char value[ATTR_SIZE]) {
-  // Algebra::select
+int Frontend::select_from_table_where(char relname_source[ATTR_SIZE], char relname_target[ATTR_SIZE], 
+   char attribute[ATTR_SIZE], int op, char value[ATTR_SIZE]) {
+   Algebra::select(relname_source,relname_target,attribute,op,value);
   return SUCCESS;
 }
 
 int Frontend::select_attrlist_from_table_where(char relname_source[ATTR_SIZE], char relname_target[ATTR_SIZE],
-                                               int attr_count, char attr_list[][ATTR_SIZE],
-                                               char attribute[ATTR_SIZE], int op, char value[ATTR_SIZE]) {
+                   int attr_count, char attr_list[][ATTR_SIZE], char attribute[ATTR_SIZE], int op, char value[ATTR_SIZE]) {
   // Algebra::select + Algebra::project??
   return SUCCESS;
 }
 
 int Frontend::select_from_join_where(char relname_source_one[ATTR_SIZE], char relname_source_two[ATTR_SIZE],
-                                     char relname_target[ATTR_SIZE],
-                                     char join_attr_one[ATTR_SIZE], char join_attr_two[ATTR_SIZE]) {
+                                     char relname_target[ATTR_SIZE], char join_attr_one[ATTR_SIZE], char join_attr_two[ATTR_SIZE]) {
   // Algebra::join
   return SUCCESS;
 }
@@ -84,7 +82,7 @@ int Frontend::select_from_join_where(char relname_source_one[ATTR_SIZE], char re
 int Frontend::select_attrlist_from_join_where(char relname_source_one[ATTR_SIZE], char relname_source_two[ATTR_SIZE],
                                               char relname_target[ATTR_SIZE],
                                               char join_attr_one[ATTR_SIZE], char join_attr_two[ATTR_SIZE],
-                                              int attr_count, char attr_list[][ATTR_SIZE]) {
+                                               int attr_count, char attr_list[][ATTR_SIZE]) {
   // Algebra::join + project
   return SUCCESS;
 }
