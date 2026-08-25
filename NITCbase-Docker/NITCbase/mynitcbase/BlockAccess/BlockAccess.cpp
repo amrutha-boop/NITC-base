@@ -2,12 +2,10 @@
 
 #include <cstring>
 #include<bits/stdc++.h>
-RecId BlockAccess::linearSearch(
-    int relId,
+RecId BlockAccess::linearSearch( int relId,
     char attrName[ATTR_SIZE],
     union Attribute attrVal,
-    int op
-) {
+    int op) {
     RecId prevRecId;
     RelCacheTable::getSearchIndex(relId, &prevRecId);
 

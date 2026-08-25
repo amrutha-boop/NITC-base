@@ -57,7 +57,7 @@ int AttrCacheTable::getAttrCatEntry(int relId, int attrOffset, AttrCatEntry* att
 void AttrCacheTable::recordToAttrCatEntry(union Attribute record[ATTRCAT_NO_ATTRS], AttrCatEntry* attrCatEntry) {
   strcpy(attrCatEntry->relName, record[ATTRCAT_REL_NAME_INDEX].sVal);
   strcpy(attrCatEntry->attrName, record[ATTRCAT_ATTR_NAME_INDEX].sVal);
-  attrCatEntry->attrType = record[ATTRCAT_ATTR_TYPE_INDEX].nVal;
+  attrCatEntry->attrType =(int)record[ATTRCAT_ATTR_TYPE_INDEX].nVal;
   attrCatEntry->primaryFlag = record[ATTRCAT_PRIMARY_FLAG_INDEX].nVal;
   attrCatEntry->rootBlock = record[ATTRCAT_ROOT_BLOCK_INDEX].nVal;
   attrCatEntry->offset = record[ATTRCAT_OFFSET_INDEX].nVal;
