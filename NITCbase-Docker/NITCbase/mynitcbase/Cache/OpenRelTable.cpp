@@ -140,7 +140,7 @@ int OpenRelTable::getRelId( char relName[ATTR_SIZE]) {
   /* traverse through the tableMetaInfo array,
     find the entry in the Open Relation Table corresponding to relName.*/
         for(int i=0;i<MAX_OPEN;i++){
-        if(!strcmp(tableMetaInfo[i].relName,relName))
+        if(tableMetaInfo[i].free==false && !strcmp(tableMetaInfo[i].relName,relName))
         return i;
     }
 
@@ -180,7 +180,6 @@ int OpenRelTable::openRel(char relName[ATTR_SIZE]) {
     RecId relcatRecId =BlockAccess::linearSearch(RELCAT_RELID,relNameAttrName,relNameAttr,EQ);
 
   // relcatRecId stores the rec-id of the relation `relName` in the Relation Catalog.
- // cout<<relcatRecId.block<<' '<<relcatRecId.slot;
 
   if (relcatRecId.block == -1 && relcatRecId.slot== -1 ) {
     // (the relation is not found in the Relation Catalog.)
