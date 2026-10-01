@@ -58,6 +58,18 @@ int RelCacheTable::getRelCatEntry(int relId, RelCatEntry* relCatBuf) {
   return SUCCESS;
 }
 
+int RelCacheTable::setRelCatEntry(int relId, RelCatEntry *relCatBuf) {
+  if(relId < 0 || relId >= MAX_OPEN) 
+    return E_OUTOFBOUND;
+  if(RelCacheTable::relCache[relId] == nullptr) 
+    return E_RELNOTOPEN;
+
+  relCache[relId]->relCatEntry = *relCatBuf;
+  relCache[relId]->dirty = true;
+
+  return SUCCESS;
+}
+
 //Convert a record from the relation catalog to a RelCatEntry struct
 void RelCacheTable::recordToRelCatEntry(union Attribute record[RELCAT_NO_ATTRS], RelCatEntry* relCatEntry) {
   strcpy(relCatEntry->relName, record[RELCAT_REL_NAME_INDEX].sVal);
@@ -66,4 +78,14 @@ void RelCacheTable::recordToRelCatEntry(union Attribute record[RELCAT_NO_ATTRS],
   relCatEntry->firstBlk = (int)record[RELCAT_FIRST_BLOCK_INDEX].nVal;
   relCatEntry->lastBlk = (int)record[RELCAT_LAST_BLOCK_INDEX].nVal;
   relCatEntry->numSlotsPerBlk = (int)record[RELCAT_NO_SLOTS_PER_BLOCK_INDEX].nVal;
+}
+
+//Convert a RelCatEntry struct to a record for the relation catalog
+void RelCacheTable::relCatEntryToRecord(RelCatEntry *relCatEntry, union Attribute record[RELCAT_NO_ATTRS]) {
+    strcpy(record[RELCAT_REL_NAME_INDEX].sVal, relCatEntry->relName);
+    record[RELCAT_NO_ATTRIBUTES_INDEX].nVal = relCatEntry->numAttrs;
+    record[RELCAT_NO_RECORDS_INDEX].nVal = relCatEntry->numRecs;
+    record[RELCAT_FIRST_BLOCK_INDEX].nVal = relCatEntry->firstBlk;
+    record[RELCAT_LAST_BLOCK_INDEX].nVal = relCatEntry->lastBlk;
+    record[RELCAT_NO_SLOTS_PER_BLOCK_INDEX].nVal = relCatEntry->numSlotsPerBlk;
 }
