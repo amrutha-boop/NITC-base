@@ -8,10 +8,19 @@ BlockBuffer::BlockBuffer(int blockNum) {
   this->blockNum = blockNum;
 }
 
+
 BlockBuffer::BlockBuffer(char blockType){
-    int ret = getFreeBlock(blockType);
+    int blocktype;
+    if(blockType == 'R')
+        blocktype = REC;
+    else if(blockType == 'I')
+        blocktype = IND_INTERNAL;
+    else  
+        blocktype = IND_LEAF;
+    int ret = getFreeBlock(blocktype);
     this->blockNum = ret;
 }
+
 
 
 // calls the parent class constructor
@@ -285,4 +294,29 @@ int compareAttrs(union Attribute attr1, union Attribute attr2, int attrType) {
     if (diff < 0) return -1;
       return 0;
     
+}
+
+void BlockBuffer::releaseBlock(){
+
+    // if blockNum is INVALID_BLOCKNUM (-1), or it is invalidated already, do nothing
+        if(this->blockNum == INVALID_BLOCKNUM)
+        return;
+
+     // Find the block's buffer.
+    int bufferNum = StaticBuffer::getBufferNum(this->blockNum);   
+
+        // if the block is present in the buffer, free the buffer
+        // by setting the free flag of its StaticBuffer::tableMetaInfo entry
+        // to true.
+        if(bufferNum != E_BLOCKNOTINBUFFER)
+        StaticBuffer::metainfo[bufferNum].free = true;
+
+        // free the block in disk by setting the data type of the entry
+        // corresponding to the block number in StaticBuffer::blockAllocMap
+        // to UNUSED_BLK.
+
+        StaticBuffer::blockAllocMap[this->blockNum] = UNUSED_BLK;
+
+        // Invalidate the block number.
+        this->blockNum = -1;
 }
