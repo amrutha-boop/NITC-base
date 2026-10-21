@@ -3,6 +3,78 @@
 #include <cstring>
 #include<bits/stdc++.h>
 
+
+int BlockAccess::project(int relId, Attribute *record) {
+    // Get the previous search position of the relation relId from the relation.
+    RecId prevRecId;
+    RelCacheTable::getSearchIndex(relId, &prevRecId);
+
+    // Track the current block and slot.
+    int block, slot;
+
+    // Start from the first block for a new scan.
+    if (prevRecId.block == -1 && prevRecId.slot == -1)
+    {
+        RelCatEntry relCatEntry;
+         // get the first record block of the relation from the relation cache
+        RelCacheTable::getRelCatEntry(relId, &relCatEntry);
+
+        block = relCatEntry.firstBlk;
+        slot = 0;
+    }
+    else
+    {
+        block = prevRecId.block;
+        slot = prevRecId.slot + 1;
+    }
+
+
+    // Find the next occupied record of the relation.
+    while (block != -1)
+    {
+        // Open the current block.
+        RecBuffer recBuffer(block);
+
+        // Read the block header and slot map.
+        HeadInfo head;
+        recBuffer.getHeader(&head);
+        unsigned char slotMap[head.numSlots];
+        recBuffer.getSlotMap(slotMap);
+
+        if(slot >= head.numSlots)
+        {
+            // Move to the next block.
+            block = head.rblock;
+            slot = 0;
+        }
+        else if (slotMap[slot] == SLOT_UNOCCUPIED) {
+            // Skip unoccupied slots.
+            slot++;
+        }
+        else {
+            // Stop at the next occupied slot.
+            break;
+        }
+    }
+
+    if (block == -1){
+         // (a record was not found. all records exhausted)
+        // No occupied record remains.
+        return E_NOTFOUND;
+    }
+
+    // Save the found record position.
+    RecId nextRecId{block, slot};
+
+    // Update the search position.
+    RelCacheTable::setSearchIndex(relId, &nextRecId);
+    // Load the record into the output buffer.
+    RecBuffer recBuffer(nextRecId.block);
+    recBuffer.getRecord(record, nextRecId.slot);
+
+    return SUCCESS;
+}
+
 //This method searches the relation specified linearly
 // to find the next record that satisfies the specified condition
 RecId BlockAccess::linearSearch( int relId,
@@ -224,8 +296,8 @@ int BlockAccess::insert(int relId, Attribute *record) {
 
         RecBuffer recBuffer;
         int ret = recBuffer.getBlockNum();
-        if (ret == E_DISKFULL) {
-            return E_DISKFULL;
+        if (ret <0) {
+            return ret;
         }
 
         rec_id.block = ret;
