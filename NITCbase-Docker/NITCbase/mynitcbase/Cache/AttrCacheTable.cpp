@@ -62,3 +62,102 @@ void AttrCacheTable::recordToAttrCatEntry(union Attribute record[ATTRCAT_NO_ATTR
   attrCatEntry->rootBlock = record[ATTRCAT_ROOT_BLOCK_INDEX].nVal;
   attrCatEntry->offset = record[ATTRCAT_OFFSET_INDEX].nVal;
 }
+//Gives the value of searchIndex field of the given attribute in the specified relation from Attribute Cache Table. 
+//This is used by the B+ Tree search algorithm to find the location of the previous hit so that the search can be resumed from the next leaf index entry.
+int AttrCacheTable::getSearchIndex(int relId, char attrName[ATTR_SIZE], IndexId *searchIndex) {
+    if (relId < 0 || relId >= MAX_OPEN)
+        return E_OUTOFBOUND;
+
+    if (AttrCacheTable::attrCache[relId] == nullptr)
+        return E_RELNOTOPEN;
+
+    AttrCacheEntry *curr = AttrCacheTable::attrCache[relId];
+
+    while (curr) {
+        if (strcmp(curr->attrCatEntry.attrName, attrName) == 0) {
+            *searchIndex = curr->searchIndex;
+            return SUCCESS;
+        }
+        curr = curr->next;
+    }
+
+    return E_ATTRNOTEXIST;
+}
+//Gives the value of searchIndex field of the given attribute in the specified relation from Attribute Cache Table.
+// This is used by the B+ Tree search algorithm to find the location of the previous hit so that the search can be resumed from the next leaf index entry.
+
+int AttrCacheTable::getSearchIndex(int relId, int attrOffset, IndexId *searchIndex) {
+    if (relId < 0 || relId >= MAX_OPEN)
+        return E_OUTOFBOUND;
+
+    if (AttrCacheTable::attrCache[relId] == nullptr)
+        return E_RELNOTOPEN;
+
+    AttrCacheEntry *curr = AttrCacheTable::attrCache[relId];
+
+    while (curr) {
+        if (curr->attrCatEntry.offset == attrOffset) {
+            *searchIndex = curr->searchIndex;
+            return SUCCESS;
+        }
+        curr = curr->next;
+    }
+
+    return E_ATTRNOTEXIST;
+}
+
+//Sets the value of searchIndex field of the given attribute in the specified relation's Attribute Cache Table entry.
+// This is used by the B+ Tree search algorithm to set the location of the previous hit so that the search can be resumed from the next leaf index entry
+int AttrCacheTable::setSearchIndex(int relId, char attrName[ATTR_SIZE], IndexId *searchIndex) {
+    if (relId < 0 || relId >= MAX_OPEN)
+        return E_OUTOFBOUND;
+
+    if (AttrCacheTable::attrCache[relId] == nullptr)
+        return E_RELNOTOPEN;
+
+    AttrCacheEntry *curr = AttrCacheTable::attrCache[relId];
+
+    while (curr) {
+        if (strcmp(curr->attrCatEntry.attrName, attrName) == 0) {
+            curr->searchIndex = *searchIndex;
+            return SUCCESS;
+        }
+        curr = curr->next;
+    }
+
+    return E_ATTRNOTEXIST;
+}
+
+
+int AttrCacheTable::setSearchIndex(int relId, int attrOffset, IndexId *searchIndex) {
+    if (relId < 0 || relId >= MAX_OPEN)
+        return E_OUTOFBOUND;
+
+    if (AttrCacheTable::attrCache[relId] == nullptr)
+        return E_RELNOTOPEN;
+
+    AttrCacheEntry *curr = AttrCacheTable::attrCache[relId];
+
+    while (curr) {
+        if (curr->attrCatEntry.offset == attrOffset) {
+            curr->searchIndex = *searchIndex;
+            return SUCCESS;
+        }
+        curr = curr->next;
+    }
+
+    return E_ATTRNOTEXIST;
+}
+
+//Resets the value of searchIndex field of the given attribute in the specified relation from Attribute Cache Table to {-1, -1}.
+// This is used so that the B+ tree search can be restarted from the root.
+int AttrCacheTable::resetSearchIndex(int relId, char attrName[ATTR_SIZE]) {
+    IndexId indexId = {-1, -1};
+    return AttrCacheTable::setSearchIndex(relId, attrName, &indexId);
+}
+
+
+int AttrCacheTable::resetSearchIndex(int relId, int attrOffset) {
+    IndexId indexId = {-1, -1};
+    return AttrCacheTable::setSearchIndex(relId, attrOffset, &indexId);
+}

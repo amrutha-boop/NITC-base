@@ -68,8 +68,37 @@ int Frontend::select_from_table_where(char relname_source[ATTR_SIZE], char relna
 
 int Frontend::select_attrlist_from_table_where(char relname_source[ATTR_SIZE], char relname_target[ATTR_SIZE],
                    int attr_count, char attr_list[][ATTR_SIZE], char attribute[ATTR_SIZE], int op, char value[ATTR_SIZE]) {
-  // Algebra::select + Algebra::project??
-  return SUCCESS;
+  // Select matching records into TEMP.
+    int ret = Algebra::select(
+        relname_source, TEMP, attribute, op, value
+    );
+
+    // Return error if selection fails.
+    if (ret != SUCCESS)
+        return ret;
+
+    // Open TEMP relation.
+    int tempRelId = OpenRelTable::openRel(TEMP);
+
+    // Delete TEMP if opening fails.
+    if (tempRelId < 0 || tempRelId >= MAX_OPEN) {
+        Schema::deleteRel(TEMP);
+        return tempRelId;
+    }
+
+    // Project selected attributes from TEMP into target.
+    ret = Algebra::project(
+        TEMP, relname_target, attr_count, attr_list
+    );
+
+    // Close TEMP relation.
+    Schema::closeRel(TEMP);
+
+    // Delete TEMP relation.
+    Schema::deleteRel(TEMP);
+
+    // Return project result.
+    return ret;
 }
 
 int Frontend::select_from_join_where(char relname_source_one[ATTR_SIZE], char relname_source_two[ATTR_SIZE],

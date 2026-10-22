@@ -69,11 +69,12 @@ int Algebra::select(char srcRel[ATTR_SIZE], char targetRel[ATTR_SIZE],
         return targetRelId;
     }
 
-    // Reset search to start from the first record.
+    // Reset search to start from the first record 
     RelCacheTable::resetSearchIndex(srcRelid);
+    AttrCacheTable::resetSearchIndex(srcRelid, attr);
 
     Attribute record[src_nAttrs];
-
+    numComparisons=0;
     // Find and insert all matching records.
     while (BlockAccess::search(srcRelid, record, attr, attrVal, op) == SUCCESS) {
 
@@ -85,6 +86,7 @@ int Algebra::select(char srcRel[ATTR_SIZE], char targetRel[ATTR_SIZE],
             return ret;
         }
     }
+    printf("Number of Comparisons:%d\n",numComparisons);
 
     // Close the target relation.
     Schema::closeRel(targetRel);
@@ -308,4 +310,3 @@ int Algebra::insert(char relName[ATTR_SIZE], int nAttrs, char record[][ATTR_SIZE
     int retVal = BlockAccess::insert(relId, recordValues);
     return retVal;
 }
-
