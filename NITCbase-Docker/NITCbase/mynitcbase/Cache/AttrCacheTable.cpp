@@ -161,3 +161,85 @@ int AttrCacheTable::resetSearchIndex(int relId, int attrOffset) {
     IndexId indexId = {-1, -1};
     return AttrCacheTable::setSearchIndex(relId, attrOffset, &indexId);
 }
+
+int AttrCacheTable::setAttrCatEntry(int relId, char attrName[ATTR_SIZE], AttrCatEntry *attrCatBuf)
+{
+
+    //  check that relId is valid and corresponds to an open relation
+    //! check if 0 <= relId < MAX_OPEN and return E_OUTOFBOUND otherwise
+    if (relId < 0 || relId >= MAX_OPEN)
+        return E_OUTOFBOUND;
+
+    //! check if attrCache[relId] == nullptr and return E_RELNOTOPEN if true
+    if (attrCache[relId] == nullptr)
+        return E_RELNOTOPEN;
+
+    //  iterate over the entries in the attribute cache and set attrCatBuf to the entry that matches attrName
+    //  traverse the linked list of attribute cache entries
+    for (AttrCacheEntry *entry = attrCache[relId]; entry != nullptr; entry = entry->next)
+    {
+        if (strcmp(entry->attrCatEntry.attrName, attrName) == 0) // matching the name
+        {
+            //  copy entry->attrCatEntry to *attrCatBuf and return SUCCESS;
+            strcpy(entry->attrCatEntry.relName, attrCatBuf->relName);
+            strcpy(entry->attrCatEntry.attrName, attrCatBuf->attrName);
+
+            entry->attrCatEntry.attrType = attrCatBuf->attrType;
+            entry->attrCatEntry.primaryFlag = attrCatBuf->primaryFlag;
+            entry->attrCatEntry.rootBlock = attrCatBuf->rootBlock;
+            entry->attrCatEntry.offset = attrCatBuf->offset;
+
+            entry->dirty = true;
+
+            return SUCCESS;
+        }
+    }
+    
+    return E_ATTRNOTEXIST;
+}
+
+int AttrCacheTable::setAttrCatEntry(int relId, int attrOffset, AttrCatEntry *attrCatBuf)
+{
+    // check if 0 <= relId < MAX_OPEN and return E_OUTOFBOUND otherwise
+    if (relId < 0 || relId >= MAX_OPEN)
+        return E_OUTOFBOUND;
+
+    //check if attrCache[relId] == nullptr and return E_RELNOTOPEN if true
+    if (attrCache[relId] == nullptr)
+        return E_RELNOTOPEN;
+
+    // traverse the linked list of attribute cache entries
+    for (AttrCacheEntry *entry = attrCache[relId]; entry != nullptr; entry = entry->next)
+    {
+        if (entry->attrCatEntry.offset == attrOffset)
+        {
+            // TODO: copy entry->attrCatEntry to *attrCatBuf and return SUCCESS;
+            strcpy(entry->attrCatEntry.relName, attrCatBuf->relName);
+            strcpy(entry->attrCatEntry.attrName, attrCatBuf->attrName);
+
+            entry->attrCatEntry.attrType = attrCatBuf->attrType;
+            entry->attrCatEntry.primaryFlag = attrCatBuf->primaryFlag;
+            entry->attrCatEntry.rootBlock = attrCatBuf->rootBlock;
+            entry->attrCatEntry.offset = attrCatBuf->offset;
+
+            entry->dirty = true;
+
+            return SUCCESS;
+        }
+    }
+
+    //there is no attribute at this offset
+    return E_ATTRNOTEXIST;
+}
+
+void AttrCacheTable::attrCatEntryToRecord(AttrCatEntry *attrCatEntry, Attribute record[ATTRCAT_NO_ATTRS])
+{
+    strcpy(record[ATTRCAT_REL_NAME_INDEX].sVal, attrCatEntry->relName);
+    strcpy(record[ATTRCAT_ATTR_NAME_INDEX].sVal, attrCatEntry->attrName);
+    record[ATTRCAT_ATTR_TYPE_INDEX].nVal = attrCatEntry->attrType;
+    record[ATTRCAT_PRIMARY_FLAG_INDEX].nVal = attrCatEntry->primaryFlag;
+    record[ATTRCAT_ROOT_BLOCK_INDEX].nVal = attrCatEntry->rootBlock;
+    record[ATTRCAT_OFFSET_INDEX].nVal = attrCatEntry->offset;
+
+    // copy the rest of the fields in the record to the attrCacheEntry struct
+}
