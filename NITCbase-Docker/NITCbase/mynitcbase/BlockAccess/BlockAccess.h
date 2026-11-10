@@ -7,6 +7,8 @@
 #include "../Cache/RelCacheTable.h"
 #include "../define/constants.h"
 #include "../define/id.h"
+#include "../Algebra/Algebra.h"
+
 
 class BlockAccess {
  public:

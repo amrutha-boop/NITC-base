@@ -46,6 +46,7 @@
 
 #define INVALID_BLOCKNUM -1  // Indicates the Block number as Invalid.
 
+
 enum AttributeType {
   NUMBER = 0,  // for an integer or a floating point number
   STRING = 1,

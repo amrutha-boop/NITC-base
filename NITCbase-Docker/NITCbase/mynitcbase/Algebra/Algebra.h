@@ -4,6 +4,8 @@
 #include "../Cache/OpenRelTable.h"
 #include "../Schema/Schema.h"
 #include "../define/constants.h"
+#include"../BlockAccess/BlockAccess.h"
+
 
 class Algebra {
  public:

@@ -1,6 +1,8 @@
 #include "BlockAccess.h"
 #include <cstring>
-
+#include <cstdio>
+int comp=0;
+int blkac=0;
 int BlockAccess::project(int relId, Attribute *record) {
     // Get the previous search position.
     RecId prevRecId;
@@ -132,7 +134,8 @@ RecId BlockAccess::linearSearch(int relId, char attrName[ATTR_SIZE], union Attri
             RecId recId;                    
             recId.block = block;
             recId.slot = slot;
-            RelCacheTable::setSearchIndex(relId, &recId);                   // Save the search position.
+            RelCacheTable::setSearchIndex(relId, &recId); 
+            comp++;                  // Save the search position.
             return RecId{block, slot};
         }
         slot++;
@@ -421,7 +424,6 @@ int BlockAccess::insert(int relId, Attribute *record) {
 
 int BlockAccess::search(int relId, Attribute *record, char attrName[ATTR_SIZE], Attribute attrVal, int op) {
     RecId recId;
-
     // Get the attribute catalog entry from the attribute cache.
     AttrCatEntry attrCatEntry;
     int ret = AttrCacheTable::getAttrCatEntry(
@@ -435,6 +437,7 @@ int BlockAccess::search(int relId, Attribute *record, char attrName[ATTR_SIZE], 
     if (attrCatEntry.rootBlock == -1) {
         // No index: search using linear search.
         recId = linearSearch(relId, attrName, attrVal, op);
+        printf("Comparisons::%d\n",comp);
     } else {
         // Index exists: search using the B+ tree.
         recId = BPlusTree::bPlusSearch(relId, attrName, attrVal, op);
@@ -450,7 +453,8 @@ int BlockAccess::search(int relId, Attribute *record, char attrName[ATTR_SIZE], 
 
     if (ret != SUCCESS)
         return ret;
-
+    printf("Comparisons::%d\n",comp);
+    
     return SUCCESS;
 }
 
